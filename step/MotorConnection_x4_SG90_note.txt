@@ -1,0 +1,4 @@
+This servo slot was widened from the original MotorConnection_x4 STL.
+Target: SG90 servo (tab span 32.6mm, body width 12.2mm)
+Clearance: 0.4 mm per side
+Modified STL: C:\Users\yoges\Desktop\phonebot-print\stl\MotorConnection_x4_SG90.stl
