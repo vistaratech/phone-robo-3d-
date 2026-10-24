@@ -344,198 +344,219 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script>
     // ── Part definitions ──
+    // All parts are loaded in their NATIVE STL coordinate system (no centering).
+    // The STL coordinate system uses Z-up. Three.js uses Y-up.
+    // Rotation [-PI/2, 0, 0] converts: STL_X→Three_X, STL_Y→Three_-Z, STL_Z→Three_Y
+    //
+    // Body parts (TorsoBase, PelvisTop, PelvisBottom, PhoneMount, ElectronicsFrame)
+    // share a common coordinate origin and align naturally at pos=[0,0,0].
+    //
+    // Leg parts (HipBracket, MotorConnection, UpperLeg, LowerLeg, Foot, IdlerBracket)
+    // are designed for one side; mirrored sides use scale.x = -1.
+    //
+    // The "mirror" flag on a part causes X-axis mirroring instead of Z-rotation.
+
     const PARTS = [
+      // ─── Body (center) ───
       {
         file: 'SG90/TorsoBase_x1.stl', name: 'TorsoBase', qty: 1,
-        color: 0x4a90d9, desc: 'Main body frame - holds hip servos',
-        pos: [0, 0, 0], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [0, 0.6, 0]
+        color: 0x4a90d9, desc: 'Main body frame — holds hip servos',
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [0, 0.8, 0]
       },
       {
         file: 'SG90/PelvisTop_x1.stl', name: 'PelvisTop', qty: 1,
-        color: 0x50c878, desc: 'Upper pelvis plate - servo pass-through',
-        pos: [0, -8, 0], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [0, -0.3, 0]
+        color: 0x50c878, desc: 'Upper pelvis plate — servo slots (SG90 modified)',
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [0, 0.3, 0]
       },
       {
         file: 'SG90/PelvisBottom_x1.stl', name: 'PelvisBottom', qty: 1,
-        color: 0x3cb371, desc: 'Lower pelvis plate',
-        pos: [0, -22, 0], rot: [-Math.PI/2, 0, 0],
+        color: 0x3cb371, desc: 'Lower pelvis plate — servo slots (SG90 modified)',
+        pos: [0, 0, 0], mirror: false,
         explodeDir: [0, -0.6, 0]
       },
       {
         file: 'SG90/PhoneMount_x1.stl', name: 'PhoneMount', qty: 1,
         color: 0x9b59b6, desc: 'Smartphone holder on top',
-        pos: [0, 8, 0], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [0, 1.2, 0]
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [0, 1.5, 0]
       },
       {
         file: 'SG90/ElectronicsFrame_x1.stl', name: 'ElectronicsFrame', qty: 1,
         color: 0xe67e22, desc: 'Electronics mounting plate',
-        pos: [0, 3, 0], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [0, 0.9, 0]
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [0, 1.0, 0.3]
       },
-      // Front-Left leg
+
+      // ─── Front-Left leg (native orientation) ───
       {
         file: 'SG90/HipBracket_x2.stl', name: 'HipBracket (FL)', qty: '2 total',
         color: 0xe74c3c, desc: 'Front-Left hip joint bracket',
-        pos: [55, -5, 20], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.0, 0, 0.4]
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [1.0, -0.5, -0.8]
       },
       {
-        file: 'SG90/MotorConnection_x4.stl', name: 'MotorConnection (FL-hip)', qty: '4 total',
+        file: 'SG90/MotorConnection_x4.stl', name: 'MotorConnection (FL)', qty: '4 total',
         color: 0xf39c12, desc: 'FL hip servo mount (SG90 modified)',
-        pos: [50, -8, 12], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.2, 0, 0.3]
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [0.8, -0.2, -0.5]
       },
       {
         file: 'SG90/UpperLegLink_x2.stl', name: 'UpperLeg (FL)', qty: '2 total',
         color: 0x1abc9c, desc: 'Front-Left upper leg link',
-        pos: [60, -25, 15], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.2, -0.5, 0.4]
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [1.2, -0.5, -0.6]
       },
       {
         file: 'SG90/LowerLegLink_x2.stl', name: 'LowerLeg (FL)', qty: '2 total',
         color: 0x16a085, desc: 'Front-Left lower leg link',
-        pos: [60, -55, 10], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.2, -1.0, 0.4]
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [1.2, -1.0, -0.4]
       },
       {
         file: 'SG90/Foot_x2.stl', name: 'Foot (FL)', qty: '2 total',
         color: 0x2c3e50, desc: 'Front-Left foot',
-        pos: [60, -80, 5], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.2, -1.5, 0.4]
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [0.6, -1.5, -0.3]
       },
-      // Front-Right leg (mirror)
+      {
+        file: 'SG90/IdlerServoBracket_x4.stl', name: 'IdlerBracket (FL)', qty: '4 total',
+        color: 0x95a5a6, desc: 'FL knee idler bracket',
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [0.5, 0.3, 0.3]
+      },
+
+      // ─── Front-Right leg (mirrored X) ───
       {
         file: 'SG90/HipBracket_x2.stl', name: 'HipBracket (FR)', qty: '',
         color: 0xe74c3c, desc: 'Front-Right hip joint bracket',
-        pos: [-55, -5, 20], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.0, 0, 0.4]
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-1.0, -0.5, -0.8]
       },
       {
-        file: 'SG90/MotorConnection_x4.stl', name: 'MotorConnection (FR-hip)', qty: '',
+        file: 'SG90/MotorConnection_x4.stl', name: 'MotorConnection (FR)', qty: '',
         color: 0xf39c12, desc: 'FR hip servo mount (SG90 modified)',
-        pos: [-50, -8, 12], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.2, 0, 0.3]
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-0.8, -0.2, -0.5]
       },
       {
         file: 'SG90/UpperLegLink_x2.stl', name: 'UpperLeg (FR)', qty: '',
         color: 0x1abc9c, desc: 'Front-Right upper leg link',
-        pos: [-60, -25, 15], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.2, -0.5, 0.4]
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-1.2, -0.5, -0.6]
       },
       {
         file: 'SG90/LowerLegLink_x2.stl', name: 'LowerLeg (FR)', qty: '',
         color: 0x16a085, desc: 'Front-Right lower leg link',
-        pos: [-60, -55, 10], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.2, -1.0, 0.4]
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-1.2, -1.0, -0.4]
       },
       {
         file: 'SG90/Foot_x2.stl', name: 'Foot (FR)', qty: '',
         color: 0x2c3e50, desc: 'Front-Right foot',
-        pos: [-60, -80, 5], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.2, -1.5, 0.4]
-      },
-      // Rear-Left leg
-      {
-        file: 'SG90/HipBracket_x2.stl', name: 'HipBracket (RL)', qty: '',
-        color: 0xe74c3c, desc: 'Rear-Left hip joint bracket',
-        pos: [55, -5, -25], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.0, 0, -0.4]
-      },
-      {
-        file: 'SG90/MotorConnection_x4.stl', name: 'MotorConnection (RL)', qty: '',
-        color: 0xf39c12, desc: 'RL hip servo mount (SG90 modified)',
-        pos: [50, -8, -18], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.2, 0, -0.3]
-      },
-      {
-        file: 'SG90/UpperLegLink_x2.stl', name: 'UpperLeg (RL)', qty: '',
-        color: 0x1abc9c, desc: 'Rear-Left upper leg link',
-        pos: [60, -25, -20], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.2, -0.5, -0.4]
-      },
-      {
-        file: 'SG90/LowerLegLink_x2.stl', name: 'LowerLeg (RL)', qty: '',
-        color: 0x16a085, desc: 'Rear-Left lower leg link',
-        pos: [-60, -55, -15], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.2, -1.0, -0.4]
-      },
-      {
-        file: 'SG90/Foot_x2.stl', name: 'Foot (RL)', qty: '',
-        color: 0x2c3e50, desc: 'Rear-Left foot',
-        pos: [60, -80, -10], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.2, -1.5, -0.4]
-      },
-      // Rear-Right leg
-      {
-        file: 'SG90/HipBracket_x2.stl', name: 'HipBracket (RR)', qty: '',
-        color: 0xe74c3c, desc: 'Rear-Right hip joint bracket',
-        pos: [-55, -5, -25], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.0, 0, -0.4]
-      },
-      {
-        file: 'SG90/MotorConnection_x4.stl', name: 'MotorConnection (RR)', qty: '',
-        color: 0xf39c12, desc: 'RR hip servo mount (SG90 modified)',
-        pos: [-50, -8, -18], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.2, 0, -0.3]
-      },
-      {
-        file: 'SG90/UpperLegLink_x2.stl', name: 'UpperLeg (RR)', qty: '',
-        color: 0x1abc9c, desc: 'Rear-Right upper leg link',
-        pos: [-60, -25, -20], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.2, -0.5, -0.4]
-      },
-      {
-        file: 'SG90/LowerLegLink_x2.stl', name: 'LowerLeg (RR)', qty: '',
-        color: 0x16a085, desc: 'Rear-Right lower leg link',
-        pos: [-60, -55, -15], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.2, -1.0, -0.4]
-      },
-      {
-        file: 'SG90/Foot_x2.stl', name: 'Foot (RR)', qty: '',
-        color: 0x2c3e50, desc: 'Rear-Right foot',
-        pos: [-60, -80, -10], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.2, -1.5, -0.4]
-      },
-      // IdlerServoBrackets (at each knee)
-      {
-        file: 'SG90/IdlerServoBracket_x4.stl', name: 'IdlerBracket (FL)', qty: '4 total',
-        color: 0x95a5a6, desc: 'FL knee idler bracket',
-        pos: [60, -48, 12], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.3, -0.8, 0.5]
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-0.6, -1.5, -0.3]
       },
       {
         file: 'SG90/IdlerServoBracket_x4.stl', name: 'IdlerBracket (FR)', qty: '',
         color: 0x95a5a6, desc: 'FR knee idler bracket',
-        pos: [-60, -48, 12], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.3, -0.8, 0.5]
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-0.5, 0.3, 0.3]
+      },
+
+      // ─── Rear-Left leg (same files, offset along STL Y axis) ───
+      // Rear legs are same parts but mounted at the rear hip positions.
+      // The rear hip is ~56mm behind front hip in STL-Y (Three.js -Z).
+      // PhoneBot design: parts are designed at one hip position.
+      // For rear, we offset by the hip spacing along Y.
+      {
+        file: 'SG90/HipBracket_x2.stl', name: 'HipBracket (RL)', qty: '',
+        color: 0xe74c3c, desc: 'Rear-Left hip joint bracket',
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [1.0, -0.5, 0.8]
+      },
+      {
+        file: 'SG90/MotorConnection_x4.stl', name: 'MotorConnection (RL)', qty: '',
+        color: 0xf39c12, desc: 'RL hip servo mount (SG90 modified)',
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [0.8, -0.2, 0.5]
+      },
+      {
+        file: 'SG90/UpperLegLink_x2.stl', name: 'UpperLeg (RL)', qty: '',
+        color: 0x1abc9c, desc: 'Rear-Left upper leg link',
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [1.2, -0.5, 0.6]
+      },
+      {
+        file: 'SG90/LowerLegLink_x2.stl', name: 'LowerLeg (RL)', qty: '',
+        color: 0x16a085, desc: 'Rear-Left lower leg link',
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [1.2, -1.0, 0.4]
+      },
+      {
+        file: 'SG90/Foot_x2.stl', name: 'Foot (RL)', qty: '',
+        color: 0x2c3e50, desc: 'Rear-Left foot',
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [0.6, -1.5, 0.3]
       },
       {
         file: 'SG90/IdlerServoBracket_x4.stl', name: 'IdlerBracket (RL)', qty: '',
         color: 0x95a5a6, desc: 'RL knee idler bracket',
-        pos: [60, -48, -15], rot: [-Math.PI/2, 0, 0],
-        explodeDir: [1.3, -0.8, -0.5]
+        pos: [0, 0, 0], mirror: false,
+        explodeDir: [0.5, 0.3, -0.3]
+      },
+
+      // ─── Rear-Right leg (mirrored X) ───
+      {
+        file: 'SG90/HipBracket_x2.stl', name: 'HipBracket (RR)', qty: '',
+        color: 0xe74c3c, desc: 'Rear-Right hip joint bracket',
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-1.0, -0.5, 0.8]
+      },
+      {
+        file: 'SG90/MotorConnection_x4.stl', name: 'MotorConnection (RR)', qty: '',
+        color: 0xf39c12, desc: 'RR hip servo mount (SG90 modified)',
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-0.8, -0.2, 0.5]
+      },
+      {
+        file: 'SG90/UpperLegLink_x2.stl', name: 'UpperLeg (RR)', qty: '',
+        color: 0x1abc9c, desc: 'Rear-Right upper leg link',
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-1.2, -0.5, 0.6]
+      },
+      {
+        file: 'SG90/LowerLegLink_x2.stl', name: 'LowerLeg (RR)', qty: '',
+        color: 0x16a085, desc: 'Rear-Right lower leg link',
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-1.2, -1.0, 0.4]
+      },
+      {
+        file: 'SG90/Foot_x2.stl', name: 'Foot (RR)', qty: '',
+        color: 0x2c3e50, desc: 'Rear-Right foot',
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-0.6, -1.5, 0.3]
       },
       {
         file: 'SG90/IdlerServoBracket_x4.stl', name: 'IdlerBracket (RR)', qty: '',
         color: 0x95a5a6, desc: 'RR knee idler bracket',
-        pos: [-60, -48, -15], rot: [-Math.PI/2, 0, Math.PI],
-        explodeDir: [-1.3, -0.8, -0.5]
+        pos: [0, 0, 0], mirror: true,
+        explodeDir: [-0.5, 0.3, -0.3]
       },
     ];
 
-    // SG90 servo positions (8 total: 4 hip + 4 knee)
+    // SG90 servo representation positions in Three.js coords
+    // Computed from TorsoBase servo pocket locations
     const SERVOS = [
-      { name: 'SG90 #1 (FL Hip)',  pos: [48, -5, 18] },
-      { name: 'SG90 #2 (FR Hip)',  pos: [-48, -5, 18] },
-      { name: 'SG90 #3 (RL Hip)',  pos: [48, -5, -22] },
-      { name: 'SG90 #4 (RR Hip)',  pos: [-48, -5, -22] },
-      { name: 'SG90 #5 (FL Knee)', pos: [58, -38, 14] },
-      { name: 'SG90 #6 (FR Knee)', pos: [-58, -38, 14] },
-      { name: 'SG90 #7 (RL Knee)', pos: [58, -38, -18] },
-      { name: 'SG90 #8 (RR Knee)', pos: [-58, -38, -18] },
+      { name: 'SG90 #1 (FL Hip)',  pos: [40, 6, -28] },
+      { name: 'SG90 #2 (FR Hip)',  pos: [-40, 6, -28] },
+      { name: 'SG90 #3 (RL Hip)',  pos: [40, 6, 28] },
+      { name: 'SG90 #4 (RR Hip)',  pos: [-40, 6, 28] },
+      { name: 'SG90 #5 (FL Knee)', pos: [30, -40, -12] },
+      { name: 'SG90 #6 (FR Knee)', pos: [-30, -40, -12] },
+      { name: 'SG90 #7 (RL Knee)', pos: [30, -40, 4] },
+      { name: 'SG90 #8 (RR Knee)', pos: [-30, -40, 4] },
     ];
 
     // ── Three.js Setup ──
@@ -570,7 +591,7 @@
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
-      controls.target.set(0, -20, 0);
+      controls.target.set(0, 0, 0);
       controls.minDistance = 80;
       controls.maxDistance = 600;
 
@@ -643,7 +664,8 @@
 
         function onGeometry(geometry) {
           geometry.computeVertexNormals();
-          geometry.center(); // Center at origin
+          // DO NOT center geometry — parts share a common design coordinate system
+          // and will naturally align at the origin.
 
           const material = new THREE.MeshPhysicalMaterial({
             color: part.color,
@@ -652,11 +674,22 @@
             clearcoat: 0.3,
             clearcoatRoughness: 0.4,
             transparent: false,
+            side: THREE.DoubleSide,
           });
 
           const mesh = new THREE.Mesh(geometry.clone(), material);
-          mesh.rotation.set(...part.rot);
+
+          // Convert from STL Z-up to Three.js Y-up
+          mesh.rotation.x = -Math.PI / 2;
+
+          // Mirror for right-side parts
+          if (part.mirror) {
+            mesh.scale.x = -1;
+          }
+
+          // Apply any additional offset
           mesh.position.set(...part.pos);
+
           mesh.castShadow = true;
           mesh.receiveShadow = true;
           mesh.userData = { partIndex: idx, partData: part, basePos: [...part.pos] };
