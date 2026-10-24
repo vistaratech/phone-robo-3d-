@@ -8,8 +8,8 @@ Just open all files in your slicer and print!
 | File | Qty | Notes |
 |---|---|---|
 | MotorConnection_x4.stl | **4** | Servo holder (slot widened for SG90 tabs) |
-| PelvisTop_x1.stl | **1** | Upper pelvis (Z-axis servo slots widened, X-axis joints preserved) |
-| PelvisBottom_x1.stl | **1** | Lower pelvis (Z-axis servo slots widened, X-axis joints preserved) |
+| PelvisTop_x1.stl | **1** | Upper pelvis (solid intact structural joints, 1-piece) |
+| PelvisBottom_x1.stl | **1** | Lower pelvis (solid intact structural joints, 1-piece) |
 | IdlerServoBracket_x4.stl | **4** | Idler bracket (original — tab slots already fit SG90) |
 | Foot_x2.stl | **2** | Foot (already fits SG90) |
 | HipBracket_x2.stl | **2** | Hip mount (already fits SG90) |
